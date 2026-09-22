@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mood Booster</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    
+    /* Fundal default (fără mood) */
+    body { background: #0d0d0d; color: #f5f5f5; min-height: 100vh; padding: 20px 16px 40px; transition: background 0.8s ease, color 0.3s; }
+    body.light { background: #f5f5f7; color: #1c1c1e; }
+    
+    /* Temă dinamică - DARK MODE */
+    body.mood-happy { background: #0d1a10; }
+    body.mood-neutral { background: #0d0d0d; }
+    body.mood-sad { background: #0d1018; }
+    
+    /* Temă dinamică - LIGHT MODE */
+    body.light.mood-happy { background: #eaf5ec; }
+    body.light.mood-neutral { background: #f5f5f7; }
+    body.light.mood-sad { background: #ecf0f7; }
+    
+    .container { max-width: 480px; margin: 0 auto; }
+    h1 { font-size: 28px; font-weight: 700; text-align: center; margin-bottom: 6px; letter-spacing: -0.5px; }
+    .subtitle { text-align: center; font-size: 14px; opacity: 0.6; margin-bottom: 20px; }
+    .theme-toggle { position: fixed; top: 16px; right: 16px; background: rgba(255,255,255,0.08); border: none; border-radius: 30px; padding: 8px 14px; color: #f5f5f5; font-size: 18px; cursor: pointer; z-index: 999; }
+    body.light .theme-toggle { background: rgba(0,0,0,0.06); color: #1c1c1e; }
+    #reminderContainer { margin-bottom: 14px; }
+    .reminder-msg { background: rgba(255, 204, 0, 0.12); border-left: 4px solid #ffcc00; padding: 10px 14px; border-radius: 10px; font-size: 13px; line-height: 1.4; }
+    .reminder-msg.warning { border-color: #ff3b30; background: rgba(255, 59, 48, 0.12); }
+    .reminder-msg.success { border-color: #34c759; background: rgba(52, 199, 89, 0.12); }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .stat-card { background: rgba(255,255,255,0.05); border-radius: 16px; padding: 14px 12px; text-align: center; border: 1px solid rgba(255,255,255,0.06); }
+    body.light .stat-card { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.06); }
+    .stat-card .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.5; }
+    .stat-card .value { font-size: 28px; font-weight: 700; margin-top: 2px; }
+    .stat-card .value.highlight { color: #ff6b35; }
+    .bar-chart { display: flex; gap: 8px; margin: 12px 0 16px; height: 60px; align-items: flex-end; }
+    .bar-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .bar { width: 100%; border-radius: 8px 8px 4px 4px; min-height: 4px; transition: height 0.4s ease; height: 4px; }
+    .bar.happy { background: #34c759; }
+    .bar.neutral { background: #ffcc00; }
+    .bar.sad { background: #ff3b30; }
+    .bar-label { font-size: 14px; }
+    .bar-value { font-size: 11px; font-weight: 600; }
+    .mood-buttons { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 16px 0 20px; }
+    .mood-btn { padding: 16px 8px; border: none; border-radius: 16px; font-size: 20px; font-weight: 600; cursor: pointer; background: rgba(255,255,255,0.06); color: #f5f5f5; display: flex; flex-direction: column; align-items: center; gap: 4px; border: 1px solid rgba(255,255,255,0.06); touch-action: manipulation; -webkit-tap-highlight-color: transparent; transition: transform 0.12s ease; }
+    body.light .mood-btn { background: rgba(0,0,0,0.04); color: #1c1c1e; border-color: rgba(0,0,0,0.06); }
+    .mood-btn .emoji { font-size: 32px; }
+    .mood-btn .label { font-size: 13px; font-weight: 500; }
+    .mood-btn.happy { background: rgba(52, 199, 89, 0.25); border-color: rgba(52, 199, 89, 0.3); }
+    .mood-btn.neutral { background: rgba(255, 204, 0, 0.2); border-color: rgba(255, 204, 0, 0.25); }
+    .mood-btn.sad { background: rgba(255, 59, 48, 0.2); border-color: rgba(255, 59, 48, 0.25); }
+    body.light .mood-btn.happy { background: rgba(52, 199, 89, 0.15); }
+    body.light .mood-btn.neutral { background: rgba(255, 204, 0, 0.12); }
+    body.light .mood-btn.sad { background: rgba(255, 59, 48, 0.12); }
+    .mood-btn:active { transform: scale(0.94); }
+    .week-chart { display: flex; justify-content: space-between; background: rgba(255,255,255,0.04); border-radius: 16px; padding: 14px 10px; margin: 12px 0 16px; border: 1px solid rgba(255,255,255,0.05); }
+    body.light .week-chart { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.05); }
+    .week-day { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .week-day .emoji { font-size: 26px; }
+    .week-day .name { font-size: 10px; opacity: 0.5; }
+    .history-section { margin-top: 16px; }
+    .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .history-header h3 { font-size: 16px; font-weight: 600; }
+    .clear-btn { background: rgba(255,59,48,0.15); border: none; color: #ff3b30; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .clear-btn:active { background: rgba(255,59,48,0.3); }
+    .history-list { display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto; }
+    .history-item { background: rgba(255,255,255,0.04); border-radius: 12px; padding: 12px 14px; border-left: 4px solid #666; display: flex; justify-content: space-between; align-items: center; }
+    body.light .history-item { background: rgba(0,0,0,0.03); }
+    .history-item.happy { border-left-color: #34c759; }
+    .history-item.neutral { border-left-color: #ffcc00; }
+    .history-item.sad { border-left-color: #ff3b30; }
+    .history-item .left { flex: 1; }
+    .history-item .quote { font-size: 13px; font-style: italic; line-height: 1.4; }
+    .history-item .meta { font-size: 11px; opacity: 0.5; margin-top: 4px; }
+    .history-item .mood-emoji { font-size: 26px; margin-left: 10px; }
+    .empty-state { text-align: center; opacity: 0.4; padding: 30px 0; font-size: 14px; }
+    .action-buttons { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+    .action-btn { background: rgba(0, 122, 255, 0.15); border: 1px solid rgba(0, 122, 255, 0.25); color: #f5f5f5; padding: 11px 18px; border-radius: 20px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; transition: background 0.2s; -webkit-tap-highlight-color: transparent; }
+    body.light .action-btn { color: #1c1c1e; background: rgba(0, 122, 255, 0.1); }
+    .action-btn:active { background: rgba(0, 122, 255, 0.35); }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 10000; padding: 20px; }
+    .modal-box { background: #1c1c1e; border-radius: 18px; padding: 22px; max-width: 320px; width: 100%; text-align: center; border: 1px solid rgba(255,255,255,0.08); }
+    body.light .modal-box { background: #fff; border-color: rgba(0,0,0,0.08); }
+    .modal-box h3 { font-size: 17px; margin-bottom: 8px; }
+    .modal-box p { font-size: 14px; opacity: 0.7; margin-bottom: 18px; line-height: 1.4; }
+    .modal-actions { display: flex; gap: 10px; }
+    .modal-actions button { flex: 1; padding: 10px; border-radius: 12px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .modal-cancel { background: rgba(255,255,255,0.08); color: #f5f5f5; }
+    body.light .modal-cancel { background: rgba(0,0,0,0.06); color: #1c1c1e; }
+    .modal-confirm { background: #ff3b30; color: #fff; }
+    .confetti-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; overflow: hidden; }
+    .confetti-piece { position: absolute; width: 10px; height: 10px; top: -10px; border-radius: 2px; animation: confettiFall linear forwards; }
+    @keyframes confettiFall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+    .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); color: #fff; padding: 12px 20px; border-radius: 12px; font-size: 14px; z-index: 10001; max-width: 90%; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .preview-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10002; padding: 20px; gap: 16px; }
+    .preview-modal img { max-width: 90%; max-height: 70vh; border-radius: 16px; box-shadow: 0 8px 40px rgba(0,0,0,0.5); }
+    .preview-actions { display: flex; gap: 10px; }
+    .preview-actions button { padding: 12px 24px; border-radius: 14px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; }
+    .preview-share { background: #007aff; color: #fff; }
+    .preview-close { background: rgba(255,255,255,0.15); color: #fff; }
+</style>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle">🌙</button>
+    <div class="container">
+        <h1>Mood Booster</h1>
+        <p class="subtitle">Cum te simți acum?</p>
+
+        <div id="reminderContainer"></div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="label">🔥 Streak</div>
+                <div class="value highlight" id="streakDisplay">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Stare dominantă</div>
+                <div class="value" id="dominantDisplay">—</div>
+            </div>
+        </div>
+
+        <div class="bar-chart">
+            <div class="bar-item">
+                <div class="bar-value" id="happyCount">0</div>
+                <div class="bar happy" id="happyBar"></div>
+                <div class="bar-label">😄</div>
+            </div>
+            <div class="bar-item">
+                <div class="bar-value" id="neutralCount">0</div>
+                <div class="bar neutral" id="neutralBar"></div>
+                <div class="bar-label">😐</div>
+            </div>
+            <div class="bar-item">
+                <div class="bar-value" id="sadCount">0</div>
+                <div class="bar sad" id="sadBar"></div>
+                <div class="bar-label">😔</div>
+            </div>
+        </div>
+
+        <div class="mood-buttons">
+            <button class="mood-btn happy" onclick="selectMood('happy')">
+                <span class="emoji">😄</span>
+                <span class="label">Fericit</span>
+            </button>
+            <button class="mood-btn neutral" onclick="selectMood('neutral')">
+                <span class="emoji">😐</span>
+                <span class="label">Neutru</span>
+            </button>
+            <button class="mood-btn sad" onclick="selectMood('sad')">
+                <span class="emoji">😔</span>
+                <span class="label">Trist</span>
+            </button>
+        </div>
+
+        <div class="week-chart" id="weekChart"></div>
+
+        <div class="history-section">
+            <div class="history-header">
+                <h3>📋 Istoric</h3>
+                <button class="clear-btn" id="clearBtn">Șterge tot</button>
+            </div>
+            <div class="history-list" id="historyList">
+                <div class="empty-state">Nicio înregistrare. Alege o stare mai sus!</div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="action-btn" id="exportBtn">📤 Trimite raportul</button>
+            <button class="action-btn" id="shareImageBtn">📸 Partajează ca imagine</button>
+            <button class="action-btn" id="reminderBtn">🔔 Setează reminder</button>
+        </div>
+    </div>
+
+    <div class="confetti-container" id="confettiContainer"></div>
+
+    <script>
+        const STORAGE_KEY = 'moodHistory';
+        const THEME_KEY = 'moodTrackerTheme';
+
+        let moodHistory = [];
+        let audioCtx = null;
+
+        const quotes = {
+            happy: [
+                { text: "Unlike happiness, joy is a lasting state that can be sustained even when everything is not the way we want it to be.", source: "The Will to Change" },
+                { text: "To truly be free, we must choose beyond simply surviving adversity, we must dare to create lives of sustained optimal wellbeing and joy.", source: "The Will to Change" },
+                { text: "When we choose to love, we begin to move against domination, against oppression.", source: "All About Love" },
+                { text: "One of the best guides to how to be self-loving is to give ourselves the love we are often dreaming about receiving from others.", source: "All About Love" },
+                { text: "The one person who will never leave us, whom we will never lose, is ourself.", source: "All About Love" },
+                { text: "We all long for loving community. It enhances life's joy.", source: "Communion" },
+                { text: "Love is an action, never simply a feeling.", source: "All About Love" },
+                { text: "Awareness is central to the process of love.", source: "All About Love" },
+                { text: "To love well is the task in all meaningful relationships.", source: "All About Love" }
+            ],
+            neutral: [
+                { text: "Knowing how to be solitary is central to the art of loving.", source: "All About Love" },
+                { text: "To truly love we must learn to mix various ingredients — care, affection, recognition, respect, commitment, and trust.", source: "All About Love" },
+                { text: "The word 'love' is most often defined as a noun, yet we would all love better if we used it as a verb.", source: "All About Love" },
+                { text: "Simply being a victim does not radicalize your consciousness.", source: "Feminism Is for Everybody" },
+                { text: "We cannot endure without love and there is no other way to the return of healing than through total and complete forgiveness.", source: "Sisters of the Yam" },
+                { text: "To build community requires vigilant awareness of the work we must continually do to undermine all the socialization that leads us to behave in ways that perpetuate domination.", source: "Teaching Community" },
+                { text: "Dominator culture has tried to keep us all afraid, to make us choose safety instead of risk, sameness instead of diversity.", source: "Teaching Community" },
+                { text: "The classroom remains the most radical space of possibility in the academy.", source: "Teaching to Transgress" },
+                { text: "Feminism is for everybody.", source: "Feminism Is for Everybody" }
+            ],
+            sad: [
+                { text: "Only love can heal the wounds of the past.", source: "All About Love" },
+                { text: "The wounded heart learns self-love by first overcoming low self-esteem.", source: "All About Love" },
+                { text: "Acceptance of pain is part of loving practice.", source: "All About Love" },
+                { text: "I came to theory because I was hurting — the pain within me was so intense that I could not go on living.", source: "Teaching to Transgress" },
+                { text: "Hope is essential to any political struggle for radical change.", source: "Teaching Community" },
+                { text: "Hope stretches the limits of what is possible.", source: "Teaching Community" },
+                { text: "We need to speak our shame and our pain courageously in order to recover.", source: "All About Love" },
+                { text: "Grief can be a source of knowledge.", source: "All About Love" },
+                { text: "To be loving we must be present. We cannot love and be absent.", source: "All About Love" }
+            ]
+        };
+
+        const emojiMap = { happy: '😄', neutral: '😐', sad: '😔' };
+
+        function getQuote(mood) {
+            const list = quotes[mood] || quotes.neutral;
+            const q = list[Math.floor(Math.random() * list.length)];
+            return `"${q.text}" — bell hooks, ${q.source}`;
+        }
+
+        function formatTimestamp(iso) {
+            try {
+                const d = new Date(iso);
+                if (isNaN(d.getTime())) return iso;
+                return d.toLocaleString('ro-RO', { hour12: false });
+            } catch { return iso; }
+        }
+
+        function dayKey(date) {
+            const d = new Date(date);
+            if (isNaN(d.getTime())) return '';
+            return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+        }
+
+        function showToast(text) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = text;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
+
+        function loadHistory() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    moodHistory = Array.isArray(parsed) ? parsed.filter(e => e && e.mood && e.timestamp) : [];
+                } else { moodHistory = []; }
+            } catch (e) { moodHistory = []; }
+        }
+
+        function saveHistory() {
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(moodHistory)); } catch (e) {}
+        }
+
+        function playSound(type) {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                if (type === 'happy') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(1046.50, audioCtx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'neutral') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+                } else {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.3);
+                    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+                }
+            } catch (e) {}
+        }
+
+        function vibrate(pattern) {
+            if (navigator.vibrate) { try { navigator.vibrate(pattern); } catch (e) {} }
+        }
+
+        // ========== TEMĂ DINAMICĂ ==========
+        function applyMoodTheme() {
+            // Curăță clasele vechi
+            document.body.classList.remove('mood-happy', 'mood-neutral', 'mood-sad');
+            if (moodHistory.length === 0) return;
+            const lastMood = moodHistory[moodHistory.length - 1].mood;
+            if (lastMood) {
+                document.body.classList.add('mood-' + lastMood);
+            }
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('historyList');
+            if (moodHistory.length === 0) {
+                container.innerHTML = '<div class="empty-state">Nicio înregistrare. Alege o stare mai sus!</div>';
+                return;
+            }
+            const reversed = [...moodHistory].reverse();
+            container.innerHTML = reversed.map(item => `
+                <div class="history-item ${item.mood}">
+                    <div class="left">
+                        <div class="quote">${item.quote || '—'}</div>
+                        <div class="meta">${formatTimestamp(item.timestamp)}</div>
+                    </div>
+                    <div class="mood-emoji">${emojiMap[item.mood] || '❓'}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderWeekChart() {
+            const dayNames = ['Lun', 'Mar', 'Mie', 'Joi', 'Vin', 'Sâm', 'Dum'];
+            const now = new Date();
+            const todayIdx = now.getDay();
+            const startOffset = (todayIdx === 0 ? 6 : todayIdx - 1);
+            const weekDays = [];
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(now);
+                d.setDate(now.getDate() - startOffset + i);
+                d.setHours(0, 0, 0, 0);
+                weekDays.push(d);
+            }
+            const container = document.getElementById('weekChart');
+            container.innerHTML = weekDays.map((day, i) => {
+                const key = dayKey(day);
+                const entries = moodHistory.filter(e => dayKey(e.timestamp) === key);
+                const mood = entries.length > 0 ? entries[entries.length - 1].mood : null;
+                const emoji = mood ? emojiMap[mood] : '❓';
+                return `<div class="week-day"><span class="emoji">${emoji}</span><span class="name">${dayNames[i]}</span></div>`;
+            }).join('');
+        }
+
+        function calculateStreak() {
+            if (moodHistory.length === 0) return 0;
+            const daysWithEntries = new Set(moodHistory.map(e => dayKey(e.timestamp)));
+            let streak = 0;
+            const checkDate = new Date();
+            checkDate.setHours(0, 0, 0, 0);
+            if (!daysWithEntries.has(dayKey(checkDate))) checkDate.setDate(checkDate.getDate() - 1);
+            while (daysWithEntries.has(dayKey(checkDate))) { streak++; checkDate.setDate(checkDate.getDate() - 1); }
+            return streak;
+        }
+
+        function updateStats() {
+            if (moodHistory.length === 0) {
+                document.getElementById('streakDisplay').textContent = '0';
+                document.getElementById('dominantDisplay').textContent = '—';
+                document.getElementById('happyCount').textContent = '0';
+                document.getElementById('neutralCount').textContent = '0';
+                document.getElementById('sadCount').textContent = '0';
+                document.getElementById('happyBar').style.height = '4px';
+                document.getElementById('neutralBar').style.height = '4px';
+                document.getElementById('sadBar').style.height = '4px';
+                return;
+            }
+            const now = new Date();
+            const sevenDaysAgo = new Date(now);
+            sevenDaysAgo.setDate(now.getDate() - 7);
+            sevenDaysAgo.setHours(0, 0, 0, 0);
+            const recent = moodHistory.filter(e => { const d = new Date(e.timestamp); return !isNaN(d.getTime()) && d >= sevenDaysAgo; });
+            const counts = { happy: 0, neutral: 0, sad: 0 };
+            recent.forEach(e => { if (counts[e.mood] !== undefined) counts[e.mood]++; });
+            document.getElementById('happyCount').textContent = counts.happy;
+            document.getElementById('neutralCount').textContent = counts.neutral;
+            document.getElementById('sadCount').textContent = counts.sad;
+            const maxCount = Math.max(counts.happy, counts.neutral, counts.sad, 1);
+            document.getElementById('happyBar').style.height = Math.max(4, (counts.happy / maxCount) * 50) + 'px';
+            document.getElementById('neutralBar').style.height = Math.max(4, (counts.neutral / maxCount) * 50) + 'px';
+            document.getElementById('sadBar').style.height = Math.max(4, (counts.sad / maxCount) * 50) + 'px';
+            let dominant = '—'; let max = 0;
+            for (const [mood, count] of Object.entries(counts)) { if (count > max) { max = count; dominant = mood; } }
+            document.getElementById('dominantDisplay').textContent = max > 0 ? emojiMap[dominant] : '—';
+            document.getElementById('streakDisplay').textContent = calculateStreak();
+        }
+
+        function selectMood(mood) {
+            playSound(mood);
+            if (mood === 'happy') vibrate([50, 30, 50]); else vibrate(30);
+            const entry = { mood, timestamp: new Date().toISOString(), quote: getQuote(mood) };
+            moodHistory.push(entry);
+            saveHistory();
+            if (mood === 'happy') launchConfetti();
+            renderAll();
+            checkReminder();
+        }
+
+        function askClearHistory() {
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            overlay.innerHTML = `
+                <div class="modal-box">
+                    <h3>Șterge tot istoricul?</h3>
+                    <p>Această acțiune nu poate fi anulată.</p>
+                    <div class="modal-actions">
+                        <button class="modal-cancel" id="modalCancel">Anulează</button>
+                        <button class="modal-confirm" id="modalConfirm">Șterge</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(overlay);
+            overlay.querySelector('#modalCancel').addEventListener('click', () => overlay.remove());
+            overlay.querySelector('#modalConfirm').addEventListener('click', () => {
+                overlay.remove();
+                moodHistory = [];
+                try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+                renderAll();
+                checkReminder();
+                showToast('🗑️ Istoric șters!');
+            });
+        }
+
+        function launchConfetti() {
+            const container = document.getElementById('confettiContainer');
+            const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd', '#1dd1a1', '#ee5a24', '#00d2d3', '#ff6348'];
+            for (let i = 0; i < 60; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                const size = 6 + Math.random() * 10;
+                piece.style.width = size + 'px';
+                piece.style.height = size + 'px';
+                piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+                piece.style.left = Math.random() * 100 + '%';
+                piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                piece.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+                piece.style.animationDelay = (Math.random() * 1.2) + 's';
+                container.appendChild(piece);
+            }
+            setTimeout(() => { container.innerHTML = ''; }, 4000);
+        }
+
+        function exportReport() {
+            if (moodHistory.length === 0) { showToast('Nu ai încă nicio înregistrare!'); return; }
+            const now = new Date();
+            const sevenDaysAgo = new Date(now);
+            sevenDaysAgo.setDate(now.getDate() - 7);
+            const recent = moodHistory.filter(e => new Date(e.timestamp) >= sevenDaysAgo);
+            const counts = { happy: 0, neutral: 0, sad: 0 };
+            recent.forEach(e => { if (counts[e.mood] !== undefined) counts[e.mood]++; });
+            const streak = calculateStreak();
+            let dominant = '—'; let max = 0;
+            for (const [mood, count] of Object.entries(counts)) { if (count > max) { max = count; dominant = mood; } }
+            let text = `📊 Raportul meu săptămânal\n\n`;
+            text += `😄 Fericit: ${counts.happy}\n`;
+            text += `😐 Neutru: ${counts.neutral}\n`;
+            text += `😔 Trist: ${counts.sad}\n\n`;
+            text += `🔥 Streak: ${streak} ${streak === 1 ? 'zi' : 'zile'}\n`;
+            text += `Stare dominantă: ${max > 0 ? emojiMap[dominant] : '—'}\n`;
+            if (streak > 3) text += `\n💪 Bravo! Ține-o tot așa!`;
+            if (navigator.share) {
+                navigator.share({ title: 'Raportul meu de stare', text }).catch(() => copyToClipboard(text));
+            } else { copyToClipboard(text); }
+        }
+
+        function copyToClipboard(text) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => showToast('📋 Raportul a fost copiat!')).catch(() => showToast('Eroare la copiere.'));
+            } else { showToast('Copiază manual raportul.'); }
+        }
+
+        function wrapText(ctx, text, maxWidth) {
+            const words = text.split(' ');
+            const lines = [];
+            let currentLine = '';
+            for (let n = 0; n < words.length; n++) {
+                const testLine = currentLine + words[n] + ' ';
+                const metrics = ctx.measureText(testLine);
+                if (metrics.width > maxWidth && n > 0) {
+                    lines.push(currentLine.trim());
+                    currentLine = words[n] + ' ';
+                } else {
+                    currentLine = testLine;
+                }
+            }
+            lines.push(currentLine.trim());
+            return lines;
+        }
+
+        function roundRect(ctx, x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            ctx.lineTo(x + r, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+            ctx.closePath();
+        }
+
+        function generateQuoteImage() {
+            if (moodHistory.length === 0) {
+                showToast('Nu ai încă nicio înregistrare!');
+                return;
+            }
+            const last = moodHistory[moodHistory.length - 1];
+            const size = 1080;
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            const gradients = {
+                happy: ['#34c759', '#0a8f3c'],
+                neutral: ['#ffcc00', '#d4a300'],
+                sad: ['#ff3b30', '#a81f18']
+            };
+            const [c1, c2] = gradients[last.mood] || gradients.neutral;
+            const grad = ctx.createLinearGradient(0, 0, size, size);
+            grad.addColorStop(0, c1);
+            grad.addColorStop(1, c2);
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, size, size);
+
+            ctx.fillStyle = 'rgba(255,255,255,0.15)';
+            roundRect(ctx, 60, 60, size - 120, size - 120, 50);
+            ctx.fill();
+
+            ctx.font = '120px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+            ctx.fillText(emojiMap[last.mood], 110, 110);
+
+            ctx.font = 'bold 28px sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.75)';
+            ctx.textAlign = 'right';
+            ctx.fillText('Mood Booster', size - 110, 145);
+
+            let quoteText = last.quote || '';
+            const match = quoteText.match(/^"(.+)"\s*—\s*(.+)$/);
+            let mainQuote = quoteText;
+            let author = '';
+            if (match) {
+                mainQuote = match[1];
+                author = '— ' + match[2];
+            }
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'italic 46px Georgia, serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            const maxWidth = size - 240;
+            const lines = wrapText(ctx, mainQuote, maxWidth);
+            const lineHeight = 62;
+            const totalTextHeight = lines.length * lineHeight;
+            const startY = size / 2 - totalTextHeight / 2;
+
+            lines.forEach((line, i) => {
+                ctx.fillText(line, size / 2, startY + i * lineHeight + lineHeight / 2);
+            });
+
+            if (author) {
+                ctx.font = 'bold 34px sans-serif';
+                ctx.fillStyle = 'rgba(255,255,255,0.85)';
+                ctx.fillText(author, size / 2, startY + totalTextHeight + 40);
+            }
+
+            const d = new Date(last.timestamp);
+            const dateStr = d.toLocaleDateString('ro-RO', { day: 'numeric', month: 'long', year: 'numeric' });
+            ctx.font = '26px sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.6)';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(dateStr, 110, size - 110);
+
+            ctx.textAlign = 'right';
+            ctx.fillText('🧠 mood tracker', size - 110, size - 110);
+
+            showPreviewModal(canvas);
+        }
+
+        function showPreviewModal(canvas) {
+            const overlay = document.createElement('div');
+            overlay.className = 'preview-modal';
+            const img = document.createElement('img');
+            img.src = canvas.toDataURL('image/png');
+            const actions = document.createElement('div');
+            actions.className = 'preview-actions';
+            const shareBtn = document.createElement('button');
+            shareBtn.className = 'preview-share';
+            shareBtn.textContent = '📤 Partajează';
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'preview-close';
+            closeBtn.textContent = '✕ Închide';
+            actions.appendChild(shareBtn);
+            actions.appendChild(closeBtn);
+            overlay.appendChild(img);
+            overlay.appendChild(actions);
+            document.body.appendChild(overlay);
+
+            closeBtn.addEventListener('click', () => overlay.remove());
+
+            shareBtn.addEventListener('click', async () => {
+                try {
+                    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+                    const file = new File([blob], `mood-quote-${Date.now()}.png`, { type: 'image/png' });
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({ files: [file], title: 'Citatul meu de azi' });
+                        overlay.remove();
+                        showToast('📸 Partajat cu succes!');
+                    } else {
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `mood-quote-${Date.now()}.png`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        overlay.remove();
+                        showToast('📥 Imagine descărcată!');
+                    }
+                } catch (e) {
+                    console.error(e);
+                    showToast('Eroare la partajare.');
+                }
+            });
+        }
+
+        function setReminder() {
+            const now = new Date().toLocaleString('ro-RO', { hour12: false });
+            try { localStorage.setItem('lastReminder', JSON.stringify({ timestamp: now })); } catch (e) {}
+            document.getElementById('reminderContainer').innerHTML = `<div class="reminder-msg success">✅ Reminder setat pentru ${now}</div>`;
+            showToast('🔔 Reminder activat!');
+        }
+
+        function checkReminder() {
+            const container = document.getElementById('reminderContainer');
+            if (!container) return;
+            if (moodHistory.length === 0) {
+                container.innerHTML = `<div class="reminder-msg warning">⏰ Nu ai nicio înregistrare. Alege o stare acum!</div>`;
+                return;
+            }
+            const lastEntry = moodHistory[moodHistory.length - 1];
+            const lastCheck = new Date(lastEntry.timestamp);
+            if (isNaN(lastCheck.getTime())) {
+                container.innerHTML = `<div class="reminder-msg warning">⏰ Verifică-ți starea acum!</div>`;
+                return;
+            }
+            const diffHours = (new Date() - lastCheck) / (1000 * 60 * 60);
+            if (diffHours > 24) {
+                const days = Math.floor(diffHours / 24);
+                container.innerHTML = `<div class="reminder-msg warning">⏰ Nu ți-ai verificat starea de ${days} ${days === 1 ? 'zi' : 'zile'}!</div>`;
+            } else {
+                container.innerHTML = `<div class="reminder-msg success">✅ Totul e în regulă! Ultima verificare: ${formatTimestamp(lastEntry.timestamp)}</div>`;
+            }
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light');
+            const isLight = document.body.classList.contains('light');
+            document.getElementById('themeToggle').textContent = isLight ? '☀️' : '🌙';
+            try { localStorage.setItem(THEME_KEY, isLight ? 'light' : 'dark'); } catch (e) {}
+        }
+
+        function loadTheme() {
+            try {
+                if (localStorage.getItem(THEME_KEY) === 'light') {
+                    document.body.classList.add('light');
+                    document.getElementById('themeToggle').textContent = '☀️';
+                }
+            } catch (e) {}
+        }
+
+        function renderAll() {
+            renderHistory();
+            renderWeekChart();
+            updateStats();
+            applyMoodTheme();
+        }
+
+        function init() {
+            loadTheme();
+            loadHistory();
+            renderAll();
+            checkReminder();
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+            document.getElementById('clearBtn').addEventListener('click', askClearHistory);
+            document.getElementById('exportBtn').addEventListener('click', exportReport);
+            document.getElementById('shareImageBtn').addEventListener('click', generateQuoteImage);
+            document.getElementById('reminderBtn').addEventListener('click', setReminder);
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
