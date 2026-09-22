@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Florin Craciunoiu — Web Developer</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body {
+        background: #0d0d0d;
+        color: #f5f5f5;
+        min-height: 100vh;
+        padding: 40px 20px;
+        display: flex;
+        justify-content: center;
+    }
+    .container { max-width: 720px; width: 100%; }
+    header { text-align: center; margin-bottom: 50px; }
+    h1 {
+        font-size: 42px;
+        font-weight: 800;
+        letter-spacing: -1px;
+        margin-bottom: 8px;
+        background: linear-gradient(135deg, #34c759, #007aff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .subtitle {
+        font-size: 18px;
+        opacity: 0.7;
+        margin-bottom: 20px;
+    }
+    .location {
+        font-size: 14px;
+        opacity: 0.5;
+    }
+    .intro {
+        background: rgba(255,255,255,0.04);
+        border-radius: 18px;
+        padding: 24px;
+        margin-bottom: 40px;
+        border: 1px solid rgba(255,255,255,0.06);
+        line-height: 1.6;
+        font-size: 15px;
+    }
+    .intro p { opacity: 0.8; }
+    h2 {
+        font-size: 22px;
+        margin-bottom: 20px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .projects-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    .project-card {
+        background: rgba(255,255,255,0.05);
+        border-radius: 18px;
+        padding: 22px;
+        border: 1px solid rgba(255,255,255,0.07);
+        transition: transform 0.2s ease, background 0.2s ease;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+    .project-card:hover {
+        background: rgba(255,255,255,0.08);
+        transform: translateY(-3px);
+    }
+    .project-card .emoji {
+        font-size: 40px;
+        margin-bottom: 10px;
+        display: block;
+    }
+    .project-card h3 {
+        font-size: 19px;
+        margin-bottom: 6px;
+        font-weight: 700;
+    }
+    .project-card p {
+        font-size: 14px;
+        opacity: 0.65;
+        line-height: 1.5;
+        margin-bottom: 12px;
+    }
+    .project-card .tags {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+    }
+    .tag {
+        background: rgba(52, 199, 89, 0.15);
+        color: #34c759;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .project-card .cta {
+        color: #007aff;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    footer {
+        text-align: center;
+        margin-top: 50px;
+        opacity: 0.4;
+        font-size: 13px;
+    }
+    footer a { color: #007aff; text-decoration: none; }
+</style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Florin Craciunoiu</h1>
+            <p class="subtitle">Web Developer • Aplicații web pentru afaceri mici</p>
+            <p class="location">📍 România</p>
+        </header>
+
+        <div class="intro">
+            <p>
+                Construiesc aplicații web simple, funcționale și rapide pentru afaceri mici.
+                Folosesc HTML, CSS, JavaScript și Python, cu ajutorul instrumentelor AI moderne,
+                pentru a livra proiecte de calitate într-un timp scurt.
+            </p>
+        </div>
+
+        <h2>📁 Proiecte</h2>
+
+        <div class="projects-grid">
+            <a href="moodbooster.html" class="project-card">
+                <span class="emoji">🧠</span>
+                <h3>Mood Booster</h3>
+                <p>
+                    Tracker de stări de spirit cu statistici, grafic săptămânal,
+                    confetti, partajare ca imagine și citate din bell hooks.
+                </p>
+                <div class="tags">
+                    <span class="tag">HTML</span>
+                    <span class="tag">CSS</span>
+                    <span class="tag">JavaScript</span>
+                    <span class="tag">localStorage</span>
+                </div>
+                <span class="cta">Deschide proiectul →</span>
+            </a>
+        </div>
+
+        <footer>
+            © 2026 Florin Craciunoiu • <a href="https://github.com/fcraciunoiu-create">GitHub</a>
+        </footer>
+    </div>
+</body>
+</html>
