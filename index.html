@@ -3,115 +3,586 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Florin Craciunoiu — Web Developer building simple, functional web apps for small businesses.">
 <title>Florin Craciunoiu — Web Developer</title>
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    body { background: #0d0d0d; color: #f5f5f5; min-height: 100vh; padding: 40px 20px; display: flex; justify-content: center; }
-    .container { max-width: 720px; width: 100%; }
-    header { text-align: center; margin-bottom: 50px; }
-    h1 { font-size: 42px; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px; background: linear-gradient(135deg, #34c759, #007aff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .subtitle { font-size: 18px; opacity: 0.7; margin-bottom: 20px; }
-    .location { font-size: 14px; opacity: 0.5; }
-    .intro { background: rgba(255,255,255,0.04); border-radius: 18px; padding: 24px; margin-bottom: 40px; border: 1px solid rgba(255,255,255,0.06); line-height: 1.6; font-size: 15px; }
-    .intro p { opacity: 0.8; }
-    h2 { font-size: 22px; margin-bottom: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
-    .projects-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
-    .project-card { background: rgba(255,255,255,0.05); border-radius: 18px; padding: 22px; border: 1px solid rgba(255,255,255,0.07); transition: transform 0.2s ease, background 0.2s ease; text-decoration: none; color: inherit; display: block; }
-    .project-card:hover { background: rgba(255,255,255,0.08); transform: translateY(-3px); }
-    .project-card .emoji { font-size: 40px; margin-bottom: 10px; display: block; }
-    .project-card h3 { font-size: 19px; margin-bottom: 6px; font-weight: 700; }
-    .project-card p { font-size: 14px; opacity: 0.65; line-height: 1.5; margin-bottom: 12px; }
-    .project-card .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
-    .tag { background: rgba(52, 199, 89, 0.15); color: #34c759; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-    .project-card .cta { color: #007aff; font-size: 14px; font-weight: 600; }
-    footer { text-align: center; margin-top: 50px; opacity: 0.4; font-size: 13px; }
-    footer a { color: #007aff; text-decoration: none; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+        background: #0a0a0a;
+        color: #f5f5f5;
+        min-height: 100vh;
+        line-height: 1.6;
+        overflow-x: hidden;
+        transition: background 0.3s ease, color 0.3s ease;
+    }
+    body.light { background: #fafafa; color: #1c1c1e; }
+
+    /* ========== ANIMATED BACKGROUND ========== */
+    .bg-glow {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        overflow: hidden;
+        pointer-events: none;
+    }
+    .glow-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.35;
+        will-change: transform;
+        animation: floatOrb 20s ease-in-out infinite;
+    }
+    .glow-orb.o1 { width: 400px; height: 400px; background: #ff6b35; top: -100px; left: -100px; }
+    .glow-orb.o2 { width: 500px; height: 500px; background: #007aff; bottom: -150px; right: -150px; animation-delay: -7s; }
+    .glow-orb.o3 { width: 300px; height: 300px; background: #34c759; top: 40%; left: 40%; animation-delay: -14s; }
+    body.light .glow-orb { opacity: 0.12; }
+
+    @keyframes floatOrb {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(50px, -30px) scale(1.1); }
+        66% { transform: translate(-30px, 40px) scale(0.95); }
+    }
+
+    /* ========== THEME TOGGLE ========== */
+    .theme-toggle {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 30px;
+        padding: 10px 16px;
+        color: #f5f5f5;
+        font-size: 16px;
+        cursor: pointer;
+        z-index: 999;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        transition: transform 0.2s, background 0.3s;
+        -webkit-tap-highlight-color: transparent;
+    }
+    body.light .theme-toggle {
+        background: rgba(255,255,255,0.7);
+        color: #1c1c1e;
+        border-color: rgba(0,0,0,0.08);
+    }
+    .theme-toggle:active { transform: scale(0.92); }
+
+    /* ========== HERO ========== */
+    .hero {
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 80px 24px 60px;
+        position: relative;
+    }
+    .hero-inner { max-width: 720px; }
+
+    .hero-badge {
+        display: inline-block;
+        padding: 6px 16px;
+        border-radius: 30px;
+        background: rgba(52, 199, 89, 0.12);
+        border: 1px solid rgba(52, 199, 89, 0.3);
+        color: #34c759;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        margin-bottom: 24px;
+        animation: fadeInUp 0.8s ease;
+    }
+
+    .hero h1 {
+        font-size: clamp(36px, 8vw, 68px);
+        font-weight: 800;
+        letter-spacing: -2px;
+        line-height: 1.08;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: fadeInUp 0.8s ease 0.1s both;
+    }
+    body.light .hero h1 {
+        background: linear-gradient(135deg, #1c1c1e 0%, #6a6a6a 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .hero p {
+        font-size: clamp(15px, 2.5vw, 19px);
+        opacity: 0.7;
+        max-width: 540px;
+        margin: 0 auto 32px;
+        animation: fadeInUp 0.8s ease 0.2s both;
+    }
+
+    .hero-cta {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        animation: fadeInUp 0.8s ease 0.3s both;
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .scroll-hint {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 24px;
+        opacity: 0.4;
+        animation: bounce 2s infinite;
+        pointer-events: none;
+    }
+    @keyframes bounce {
+        0%, 100% { transform: translateX(-50%) translateY(0); }
+        50% { transform: translateX(-50%) translateY(-8px); }
+    }
+
+    /* ========== BUTTONS ========== */
+    .btn {
+        padding: 14px 28px;
+        border-radius: 30px;
+        font-size: 15px;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        -webkit-tap-highlight-color: transparent;
+        white-space: nowrap;
+    }
+    .btn-primary {
+        background: #34c759;
+        color: #000;
+        box-shadow: 0 8px 24px rgba(52, 199, 89, 0.35);
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 32px rgba(52, 199, 89, 0.45);
+    }
+    .btn-secondary {
+        background: rgba(255,255,255,0.08);
+        color: #f5f5f5;
+        border: 1px solid rgba(255,255,255,0.12);
+    }
+    body.light .btn-secondary {
+        background: rgba(0,0,0,0.04);
+        color: #1c1c1e;
+        border-color: rgba(0,0,0,0.08);
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.15); }
+
+    .btn-whatsapp {
+        background: #25D366;
+        color: #fff;
+        box-shadow: 0 8px 24px rgba(37, 211, 102, 0.35);
+    }
+    .btn-whatsapp:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 32px rgba(37, 211, 102, 0.5);
+    }
+    .btn-email {
+        background: rgba(255,255,255,0.08);
+        color: #f5f5f5;
+        border: 1px solid rgba(255,255,255,0.12);
+    }
+    body.light .btn-email {
+        background: rgba(0,0,0,0.04);
+        color: #1c1c1e;
+        border-color: rgba(0,0,0,0.08);
+    }
+
+    /* ========== SECTIONS ========== */
+    .section {
+        padding: 80px 24px;
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+    .section-title {
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: #34c759;
+        margin-bottom: 12px;
+        text-align: center;
+    }
+    .section-heading {
+        font-size: clamp(26px, 5vw, 40px);
+        font-weight: 800;
+        letter-spacing: -1px;
+        text-align: center;
+        margin-bottom: 48px;
+    }
+
+    /* ========== PROJECTS GRID ========== */
+    .projects-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+    .project-card {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 20px;
+        padding: 28px 24px;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        display: block;
+    }
+    body.light .project-card {
+        background: rgba(255,255,255,0.7);
+        border-color: rgba(0,0,0,0.08);
+    }
+    .project-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--accent), transparent);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .project-card:hover {
+        transform: translateY(-6px);
+        border-color: rgba(52, 199, 89, 0.3);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+    body.light .project-card:hover { box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+    .project-card:hover::before { opacity: 1; }
+
+    .project-card[data-accent="coral"] { --accent: #ff6b35; }
+    .project-card[data-accent="blue"] { --accent: #007aff; }
+    .project-card[data-accent="green"] { --accent: #34c759; }
+    .project-card[data-accent="purple"] { --accent: #a855f7; }
+
+    .project-card .icon {
+        font-size: 42px;
+        margin-bottom: 16px;
+        display: block;
+        filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+    }
+    .project-card h3 {
+        font-size: 20px;
+        font-weight: 800;
+        margin-bottom: 8px;
+        letter-spacing: -0.3px;
+    }
+    .project-card p {
+        font-size: 14px;
+        opacity: 0.6;
+        line-height: 1.5;
+        margin-bottom: 18px;
+    }
+    .project-card .open-link {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--accent);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: gap 0.2s;
+    }
+    .project-card:hover .open-link { gap: 10px; }
+
+    /* ========== ABOUT ========== */
+    .about-box {
+        max-width: 780px;
+        margin: 0 auto;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 24px;
+        padding: 40px 32px;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+    body.light .about-box {
+        background: rgba(255,255,255,0.7);
+        border-color: rgba(0,0,0,0.08);
+    }
+    .about-box p {
+        font-size: 16px;
+        line-height: 1.8;
+        opacity: 0.85;
+        margin-bottom: 16px;
+    }
+    .about-box p:last-of-type { margin-bottom: 0; }
+    .about-box strong { color: #34c759; font-weight: 700; }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-top: 32px;
+        padding-top: 32px;
+        border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    body.light .stats-row { border-top-color: rgba(0,0,0,0.08); }
+
+    .stat { text-align: center; }
+    .stat .num {
+        font-size: 32px;
+        font-weight: 800;
+        color: #34c759;
+        letter-spacing: -1px;
+    }
+    .stat .lbl {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        opacity: 0.5;
+        margin-top: 4px;
+    }
+
+    /* ========== CONTACT ========== */
+    .contact-cta {
+        text-align: center;
+        padding: 80px 24px 60px;
+        max-width: 720px;
+        margin: 0 auto;
+    }
+    .contact-cta h2 {
+        font-size: clamp(26px, 5vw, 38px);
+        font-weight: 800;
+        letter-spacing: -1px;
+        margin-bottom: 16px;
+    }
+    .contact-cta .contact-subtitle {
+        font-size: 16px;
+        opacity: 0.7;
+        margin-bottom: 32px;
+    }
+    .contact-buttons {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 28px;
+    }
+    .contact-details {
+        font-size: 14px;
+        opacity: 0.65;
+        line-height: 1.9;
+    }
+    .contact-details a {
+        color: #34c759;
+        text-decoration: none;
+        font-weight: 600;
+        transition: opacity 0.2s;
+    }
+    .contact-details a:hover { opacity: 0.8; text-decoration: underline; }
+
+    /* ========== FOOTER ========== */
+    .footer {
+        text-align: center;
+        padding: 32px 24px;
+        font-size: 12px;
+        opacity: 0.5;
+        border-top: 1px solid rgba(255,255,255,0.05);
+        line-height: 1.8;
+    }
+    body.light .footer { border-top-color: rgba(0,0,0,0.06); }
+    .footer a {
+        color: inherit;
+        text-decoration: none;
+        transition: opacity 0.2s;
+    }
+    .footer a:hover { opacity: 0.7; text-decoration: underline; }
+
+    /* ========== MOBILE ========== */
+    @media (max-width: 600px) {
+        .section { padding: 60px 20px; }
+        .about-box { padding: 28px 22px; }
+        .project-card { padding: 24px 20px; }
+        .stat .num { font-size: 26px; }
+        .btn { padding: 13px 22px; font-size: 14px; }
+        .hero { padding: 70px 20px 50px; }
+        .contact-cta { padding: 60px 20px 40px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
 </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Florin Craciunoiu</h1>
-            <p class="subtitle">Web Developer • Building web apps for small businesses</p>
-            <p class="location">📍 Romania</p>
-        </header>
-
-        <div class="intro">
-            <p>
-                I build simple, functional, and fast web applications for small businesses.
-                I work with HTML, CSS, JavaScript, and Python, using modern AI-powered tools
-                to deliver quality projects in a short time.
-            </p>
-        </div>
-
-        <h2>📁 Projects</h2>
-
-        <div class="projects-grid">
-            <a href="moodbooster.html" class="project-card">
-                <span class="emoji">🧠</span>
-                <h3>Mood Booster</h3>
-                <p>
-                    A mood tracker with statistics, weekly chart, confetti animations,
-                    image sharing, and curated quotes from bell hooks.
-                </p>
-                <div class="tags">
-                    <span class="tag">HTML</span>
-                    <span class="tag">CSS</span>
-                    <span class="tag">JavaScript</span>
-                    <span class="tag">localStorage</span>
-                </div>
-                <span class="cta">Open project →</span>
-            </a>
-                       <a href="TaskFlow.html" class="project-card">
-                <span class="emoji">✅</span>
-                <h3>TaskFlow</h3>
-                <p>
-                    A modern task manager with priorities, filters, and clean UI design.
-                    Organize your daily tasks efficiently.
-                </p>
-                <div class="tags">
-                    <span class="tag">HTML</span>
-                    <span class="tag">CSS</span>
-                    <span class="tag">JavaScript</span>
-                    <span class="tag">localStorage</span>
-                </div>
-                <span class="cta">Open project →</span>
-            </a>
-                       <a href="habittracker.html" class="project-card">
-                <span class="emoji">🌱</span>
-                <h3>Habit Tracker</h3>
-                <p>
-                    Track your daily habits with streak counters, weekly progress dots,
-                    and a warm sunset-inspired design.
-                </p>
-                <div class="tags">
-                    <span class="tag">HTML</span>
-                    <span class="tag">CSS</span>
-                    <span class="tag">JavaScript</span>
-                    <span class="tag">localStorage</span>
-                </div>
-                <span class="cta">Open project →</span>
-            </a>
-                       <a href="invoicegenerator.html" class="project-card">
-                <span class="emoji">🧾</span>
-                <h3>Invoice Generator</h3>
-                <p>
-                    Create professional invoices with company details, VAT calculation,
-                    PDF export, and instant sharing.
-                </p>
-                <div class="tags">
-                    <span class="tag">HTML</span>
-                    <span class="tag">CSS</span>
-                    <span class="tag">JavaScript</span>
-                    <span class="tag">localStorage</span>
-                </div>
-                <span class="cta">Open project →</span>
-            </a>
-        </div>
-
-        <footer>
-            © 2026 Florin Craciunoiu • <a href="https://github.com/fcraciunoiu-create">GitHub</a>
-        </footer>
+    <!-- Animated background orbs -->
+    <div class="bg-glow" aria-hidden="true">
+        <div class="glow-orb o1"></div>
+        <div class="glow-orb o2"></div>
+        <div class="glow-orb o3"></div>
     </div>
+
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-inner">
+            <span class="hero-badge">✦ Available for new projects</span>
+            <h1>Building the web,<br>one project at a time.</h1>
+            <p>I'm Florin — a self-taught web developer from Romania creating simple, functional web apps for small businesses.</p>
+            <div class="hero-cta">
+                <a href="#projects" class="btn btn-primary">View Projects →</a>
+                <a href="https://wa.me/447487758269?text=Hi%20Florin%2C%20I%27d%20like%20to%20talk%20about%20a%20project" class="btn btn-whatsapp" target="_blank" rel="noopener">
+                    💬 WhatsApp
+                </a>
+            </div>
+        </div>
+        <div class="scroll-hint" aria-hidden="true">↓</div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section class="section" id="projects">
+        <div class="section-title">Portfolio</div>
+        <h2 class="section-heading">Things I've built</h2>
+        <div class="projects-grid">
+            <a href="moodbooster.html" class="project-card" data-accent="purple">
+                <span class="icon">🧠</span>
+                <h3>Mood Booster</h3>
+                <p>Mood tracker with statistics, weekly chart, confetti animations, and curated bell hooks quotes.</p>
+                <span class="open-link">Open project <span>→</span></span>
+            </a>
+            <a href="TaskFlow.html" class="project-card" data-accent="blue">
+                <span class="icon">✅</span>
+                <h3>TaskFlow</h3>
+                <p>Task manager with priorities, filters, deadlines, and a clean modern UI.</p>
+                <span class="open-link">Open project <span>→</span></span>
+            </a>
+            <a href="habittracker.html" class="project-card" data-accent="green">
+                <span class="icon">🌱</span>
+                <h3>Habit Tracker</h3>
+                <p>Daily habit tracker with streak counters and weekly progress dots.</p>
+                <span class="open-link">Open project <span>→</span></span>
+            </a>
+            <a href="invoicegenerator.html" class="project-card" data-accent="coral">
+                <span class="icon">🧾</span>
+                <h3>Invoice Generator</h3>
+                <p>Generate invoices with VAT calculation, PDF export, and share functionality.</p>
+                <span class="open-link">Open project <span>→</span></span>
+            </a>
+        </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="section">
+        <div class="section-title">About</div>
+        <h2 class="section-heading">A bit about me</h2>
+        <div class="about-box">
+            <p>
+                I'm a <strong>self-taught web developer</strong> based in Romania. After spending
+                12 years in the UK, I returned home and discovered a passion for building
+                web applications using modern AI-powered tools.
+            </p>
+            <p>
+                I specialize in <strong>clean, functional web apps</strong> — dashboards, trackers,
+                generators, and landing pages. I focus on solving real problems for small
+                businesses, delivered fast and built to last.
+            </p>
+            <div class="stats-row">
+                <div class="stat">
+                    <div class="num">4+</div>
+                    <div class="lbl">Projects</div>
+                </div>
+                <div class="stat">
+                    <div class="num">100%</div>
+                    <div class="lbl">Responsive</div>
+                </div>
+                <div class="stat">
+                    <div class="num">24h</div>
+                    <div class="lbl">Avg. Delivery</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="contact-cta">
+        <div class="section-title">Contact</div>
+        <h2>Let's build something together.</h2>
+        <p class="contact-subtitle">Have a project in mind? Reach out and let's talk.</p>
+        <div class="contact-buttons">
+            <a href="https://wa.me/447487758269?text=Hi%20Florin%2C%20I%27d%20like%20to%20talk%20about%20a%20project" class="btn btn-whatsapp" target="_blank" rel="noopener">
+                💬 WhatsApp me
+            </a>
+            <a href="mailto:fcraciunoiu@gmail.com" class="btn btn-email">
+                ✉️ Send email
+            </a>
+        </div>
+        <div class="contact-details">
+            ✉️ <a href="mailto:fcraciunoiu@gmail.com">fcraciunoiu@gmail.com</a><br>
+            💬 WhatsApp: <strong style="color: #34c759;">+44 7487 758269</strong><br>
+            📍 Romania · Available worldwide (remote)
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        © 2026 Florin Craciunoiu · <a href="mailto:fcraciunoiu@gmail.com">fcraciunoiu@gmail.com</a><br>
+        Built with HTML, CSS &amp; JavaScript
+    </footer>
+
+    <script>
+        const THEME_KEY = 'portfolioTheme';
+
+        function applyTheme(isLight) {
+            document.body.classList.toggle('light', isLight);
+            const btn = document.getElementById('themeToggle');
+            if (btn) btn.textContent = isLight ? '☀️' : '🌙';
+        }
+
+        function toggleTheme() {
+            const isLight = !document.body.classList.contains('light');
+            applyTheme(isLight);
+            try { localStorage.setItem(THEME_KEY, isLight ? 'light' : 'dark'); } catch (e) {}
+        }
+
+        function loadTheme() {
+            try {
+                const saved = localStorage.getItem(THEME_KEY);
+                if (saved === 'light') applyTheme(true);
+                else applyTheme(false);
+            } catch (e) {
+                applyTheme(false);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTheme();
+            const btn = document.getElementById('themeToggle');
+            if (btn) btn.addEventListener('click', toggleTheme);
+        });
+    </script>
 </body>
 </html>
