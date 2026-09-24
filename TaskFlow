@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TaskFlow</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background: #0a0a1a; color: #f5f5f5; min-height: 100vh; padding: 20px 16px 40px; transition: background 0.3s, color 0.3s; }
+    body.light { background: #faf8ff; color: #1a1a2e; }
+    .container { max-width: 480px; margin: 0 auto; }
+    h1 { font-size: 34px; font-weight: 800; text-align: center; margin-bottom: 4px; letter-spacing: -1.2px; background: linear-gradient(135deg, #a855f7, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .subtitle { text-align: center; font-size: 13px; opacity: 0.55; margin-bottom: 22px; letter-spacing: 0.3px; text-transform: uppercase; font-weight: 600; }
+    .theme-toggle { position: fixed; top: 16px; right: 16px; background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.25); border-radius: 50%; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; color: #f5f5f5; font-size: 18px; cursor: pointer; z-index: 999; transition: transform 0.2s; }
+    .theme-toggle:hover { transform: scale(1.1); }
+    body.light .theme-toggle { background: rgba(168, 85, 247, 0.1); color: #1a1a2e; }
+
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+    .stat-card { background: rgba(168, 85, 247, 0.06); border-radius: 16px; padding: 12px 8px; text-align: center; border: 1px solid rgba(168, 85, 247, 0.12); }
+    body.light .stat-card { background: rgba(168, 85, 247, 0.04); border-color: rgba(168, 85, 247, 0.15); }
+    .stat-card .label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.55; font-weight: 600; }
+    .stat-card .value { font-size: 26px; font-weight: 800; margin-top: 2px; }
+    .stat-card .value.purple { color: #a855f7; }
+    .stat-card .value.cyan { color: #06b6d4; }
+    .stat-card .value.emerald { color: #10b981; }
+
+    .add-form { display: flex; flex-direction: column; gap: 10px; background: rgba(168, 85, 247, 0.05); border-radius: 18px; padding: 16px; margin-bottom: 18px; border: 1px solid rgba(168, 85, 247, 0.12); }
+    body.light .add-form { background: rgba(168, 85, 247, 0.03); border-color: rgba(168, 85, 247, 0.15); }
+    .add-form input[type="text"] { background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.15); border-radius: 12px; padding: 13px 16px; color: #f5f5f5; font-size: 15px; outline: none; transition: border-color 0.2s; }
+    body.light .add-form input[type="text"] { background: rgba(255,255,255,0.8); border-color: rgba(168, 85, 247, 0.2); color: #1a1a2e; }
+    .add-form input[type="text"]:focus { border-color: #a855f7; }
+    .add-form input[type="date"] { background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.15); border-radius: 12px; padding: 13px 16px; color: #f5f5f5; font-size: 15px; outline: none; }
+    body.light .add-form input[type="date"] { background: rgba(255,255,255,0.8); border-color: rgba(168, 85, 247, 0.2); color: #1a1a2e; }
+    .priority-row { display: flex; gap: 8px; }
+    .priority-btn { flex: 1; padding: 11px 6px; border: 1px solid rgba(168, 85, 247, 0.15); border-radius: 12px; background: rgba(168, 85, 247, 0.04); color: #f5f5f5; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    body.light .priority-btn { background: rgba(255,255,255,0.5); color: #1a1a2e; border-color: rgba(168, 85, 247, 0.15); }
+    .priority-btn.selected.low { background: rgba(16, 185, 129, 0.25); border-color: #10b981; color: #10b981; }
+    .priority-btn.selected.medium { background: rgba(245, 158, 11, 0.25); border-color: #f59e0b; color: #f59e0b; }
+    .priority-btn.selected.high { background: rgba(239, 68, 68, 0.25); border-color: #ef4444; color: #ef4444; }
+    .add-btn { background: linear-gradient(135deg, #a855f7, #8b5cf6); color: #fff; border: none; padding: 14px; border-radius: 14px; font-size: 15px; font-weight: 700; cursor: pointer; transition: transform 0.12s, box-shadow 0.2s; box-shadow: 0 4px 20px rgba(168, 85, 247, 0.3); }
+    .add-btn:active { transform: scale(0.97); }
+
+    .filters { display: flex; gap: 8px; margin-bottom: 14px; }
+    .filter-btn { flex: 1; padding: 9px; border-radius: 20px; border: 1px solid rgba(168, 85, 247, 0.15); background: transparent; color: #f5f5f5; font-size: 13px; font-weight: 600; cursor: pointer; opacity: 0.5; transition: all 0.2s; }
+    body.light .filter-btn { color: #1a1a2e; border-color: rgba(168, 85, 247, 0.15); }
+    .filter-btn.active { opacity: 1; background: rgba(168, 85, 247, 0.15); border-color: #a855f7; color: #a855f7; }
+
+    .task-list { display: flex; flex-direction: column; gap: 8px; }
+    .task-item { display: flex; align-items: flex-start; gap: 12px; background: rgba(168, 85, 247, 0.05); border-radius: 14px; padding: 14px; border-left: 4px solid #666; transition: all 0.2s; }
+    body.light .task-item { background: rgba(168, 85, 247, 0.03); }
+    .task-item.priority-low { border-left-color: #10b981; }
+    .task-item.priority-medium { border-left-color: #f59e0b; }
+    .task-item.priority-high { border-left-color: #ef4444; }
+    .task-item.completed { opacity: 0.4; }
+    .task-item.completed .task-title { text-decoration: line-through; }
+    .task-checkbox { width: 24px; height: 24px; min-width: 24px; border-radius: 8px; border: 2px solid rgba(168, 85, 247, 0.3); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-top: 2px; transition: all 0.15s; }
+    body.light .task-checkbox { border-color: rgba(168, 85, 247, 0.3); }
+    .task-checkbox.done { background: linear-gradient(135deg, #a855f7, #06b6d4); border-color: transparent; }
+    .task-checkbox.done::after { content: '✓'; color: #fff; font-size: 14px; font-weight: 700; }
+    .task-content { flex: 1; min-width: 0; }
+    .task-title { font-size: 15px; font-weight: 500; line-height: 1.4; word-wrap: break-word; }
+    .task-meta { font-size: 11px; opacity: 0.55; margin-top: 4px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .task-meta .overdue { color: #ef4444; opacity: 1; font-weight: 600; }
+    .delete-btn { background: transparent; border: none; color: rgba(255,255,255,0.3); font-size: 22px; cursor: pointer; padding: 0 4px; line-height: 1; transition: color 0.15s; }
+    body.light .delete-btn { color: rgba(0,0,0,0.3); }
+    .delete-btn:hover { color: #ef4444; }
+    .empty-state { text-align: center; opacity: 0.4; padding: 40px 0; font-size: 14px; }
+
+    .action-buttons { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+    .action-btn { background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.3); color: #f5f5f5; padding: 13px 18px; border-radius: 14px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; transition: background 0.2s; -webkit-tap-highlight-color: transparent; }
+    body.light .action-btn { color: #1a1a2e; background: rgba(168, 85, 247, 0.08); }
+    .action-btn:active { background: rgba(168, 85, 247, 0.3); }
+    .clear-all-btn { background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.25); color: #ef4444; padding: 13px 18px; border-radius: 14px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; transition: background 0.2s; }
+    .clear-all-btn:active { background: rgba(239, 68, 68, 0.25); }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10000; padding: 20px; backdrop-filter: blur(4px); }
+    .modal-box { background: #14142b; border-radius: 20px; padding: 24px; max-width: 320px; width: 100%; text-align: center; border: 1px solid rgba(168, 85, 247, 0.2); }
+    body.light .modal-box { background: #fff; border-color: rgba(168, 85, 247, 0.15); }
+    .modal-box h3 { font-size: 17px; margin-bottom: 8px; font-weight: 700; }
+    .modal-box p { font-size: 14px; opacity: 0.7; margin-bottom: 18px; line-height: 1.4; }
+    .modal-actions { display: flex; gap: 10px; }
+    .modal-actions button { flex: 1; padding: 11px; border-radius: 12px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .modal-cancel { background: rgba(168, 85, 247, 0.1); color: #f5f5f5; }
+    body.light .modal-cancel { background: rgba(0,0,0,0.06); color: #1a1a2e; }
+    .modal-confirm { background: #ef4444; color: #fff; }
+
+    .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #a855f7, #8b5cf6); color: #fff; padding: 13px 22px; border-radius: 14px; font-size: 14px; font-weight: 600; z-index: 10001; max-width: 90%; text-align: center; box-shadow: 0 8px 30px rgba(168, 85, 247, 0.4); }
+</style>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle">🌙</button>
+    <div class="container">
+        <h1>TaskFlow</h1>
+        <p class="subtitle">Get things done</p>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="label">Total</div>
+                <div class="value purple" id="totalCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Active</div>
+                <div class="value cyan" id="activeCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Done</div>
+                <div class="value emerald" id="doneCount">0</div>
+            </div>
+        </div>
+
+        <div class="add-form">
+            <input type="text" id="taskInput" placeholder="What needs to be done?" maxlength="120">
+            <input type="date" id="dueInput">
+            <div class="priority-row">
+                <button class="priority-btn low" data-priority="low">💚 Low</button>
+                <button class="priority-btn medium selected" data-priority="medium">💛 Medium</button>
+                <button class="priority-btn high" data-priority="high">❤️ High</button>
+            </div>
+            <button class="add-btn" id="addBtn">+ Add Task</button>
+        </div>
+
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="active">Active</button>
+            <button class="filter-btn" data-filter="done">Done</button>
+        </div>
+
+        <div class="task-list" id="taskList">
+            <div class="empty-state">No tasks yet. Add your first one above!</div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="action-btn" id="shareBtn">📤 Share Task List</button>
+            <button class="clear-all-btn" id="clearAllBtn">🗑️ Clear Completed</button>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'taskManagerData';
+        const THEME_KEY = 'taskManagerTheme';
+
+        let tasks = [];
+        let currentFilter = 'all';
+        let selectedPriority = 'medium';
+        let audioCtx = null;
+
+        function playSound(type) {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                if (type === 'add') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(1400, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(900, audioCtx.currentTime + 0.04);
+                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.06);
+                } else if (type === 'complete') {
+                    const osc1 = audioCtx.createOscillator();
+                    const gain1 = audioCtx.createGain();
+                    osc1.connect(gain1);
+                    gain1.connect(audioCtx.destination);
+                    osc1.type = 'sine';
+                    osc1.frequency.setValueAtTime(1046.50, audioCtx.currentTime);
+                    gain1.gain.setValueAtTime(0.18, audioCtx.currentTime);
+                    gain1.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                    osc1.start();
+                    osc1.stop(audioCtx.currentTime + 0.15);
+
+                    const osc2 = audioCtx.createOscillator();
+                    const gain2 = audioCtx.createGain();
+                    osc2.connect(gain2);
+                    gain2.connect(audioCtx.destination);
+                    osc2.type = 'sine';
+                    osc2.frequency.setValueAtTime(1567.98, audioCtx.currentTime + 0.1);
+                    gain2.gain.setValueAtTime(0.18, audioCtx.currentTime + 0.1);
+                    gain2.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    osc2.start(audioCtx.currentTime + 0.1);
+                    osc2.stop(audioCtx.currentTime + 0.4);
+                } else if (type === 'delete') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + 0.18);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.22);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.22);
+                }
+            } catch (e) { console.log('Audio error:', e); }
+        }
+
+        function vibrate(pattern) {
+            if (navigator.vibrate) { try { navigator.vibrate(pattern); } catch (e) {} }
+        }
+
+        function loadTasks() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    tasks = Array.isArray(parsed) ? parsed.filter(t => t && t.id && t.title) : [];
+                }
+            } catch (e) { tasks = []; }
+        }
+
+        function saveTasks() {
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); } catch (e) {}
+        }
+
+        function showToast(text) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = text;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2200);
+        }
+
+        function formatDate(iso) {
+            if (!iso) return '';
+            try {
+                const d = new Date(iso);
+                return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+            } catch { return iso; }
+        }
+
+        function isOverdue(iso) {
+            if (!iso) return false;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return new Date(iso) < today;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function renderTasks() {
+            const container = document.getElementById('taskList');
+            let filtered = tasks;
+            if (currentFilter === 'active') filtered = tasks.filter(t => !t.done);
+            else if (currentFilter === 'done') filtered = tasks.filter(t => t.done);
+
+            if (filtered.length === 0) {
+                const msg = currentFilter === 'all' ? 'No tasks yet. Add your first one above!' :
+                            currentFilter === 'active' ? 'No active tasks. Well done!' :
+                            'No completed tasks yet.';
+                container.innerHTML = `<div class="empty-state">${msg}</div>`;
+                return;
+            }
+
+            const priorityOrder = { high: 0, medium: 1, low: 2 };
+            filtered.sort((a, b) => {
+                if (a.done !== b.done) return a.done ? 1 : -1;
+                const pDiff = (priorityOrder[a.priority] || 1) - (priorityOrder[b.priority] || 1);
+                if (pDiff !== 0) return pDiff;
+                if (a.due && b.due) return new Date(a.due) - new Date(b.due);
+                if (a.due) return -1;
+                if (b.due) return 1;
+                return 0;
+            });
+
+            container.innerHTML = filtered.map(task => {
+                const overdue = !task.done && isOverdue(task.due);
+                const dueText = task.due ? `<span class="${overdue ? 'overdue' : ''}">📅 ${formatDate(task.due)}${overdue ? ' (overdue)' : ''}</span>` : '';
+                const priorityLabel = task.priority === 'high' ? '❤️ High' : task.priority === 'low' ? '💚 Low' : '💛 Medium';
+                return `
+                    <div class="task-item priority-${task.priority} ${task.done ? 'completed' : ''}">
+                        <div class="task-checkbox ${task.done ? 'done' : ''}" data-id="${task.id}"></div>
+                        <div class="task-content">
+                            <div class="task-title">${escapeHtml(task.title)}</div>
+                            <div class="task-meta">
+                                <span>${priorityLabel}</span>
+                                ${dueText}
+                            </div>
+                        </div>
+                        <button class="delete-btn" data-delete="${task.id}">×</button>
+                    </div>
+                `;
+            }).join('');
+
+            container.querySelectorAll('.task-checkbox').forEach(el => {
+                el.addEventListener('click', () => toggleTask(el.dataset.id));
+            });
+            container.querySelectorAll('[data-delete]').forEach(el => {
+                el.addEventListener('click', () => deleteTask(el.dataset.delete));
+            });
+        }
+
+        function updateStats() {
+            const total = tasks.length;
+            const done = tasks.filter(t => t.done).length;
+            const active = total - done;
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('activeCount').textContent = active;
+            document.getElementById('doneCount').textContent = done;
+        }
+
+        function addTask() {
+            const input = document.getElementById('taskInput');
+            const dueInput = document.getElementById('dueInput');
+            const title = input.value.trim();
+            if (!title) { showToast('Write a task first!'); return; }
+
+            tasks.push({
+                id: Date.now().toString(),
+                title: title,
+                priority: selectedPriority,
+                due: dueInput.value || null,
+                done: false,
+                createdAt: new Date().toISOString()
+            });
+            saveTasks();
+            input.value = '';
+            dueInput.value = '';
+            playSound('add');
+            vibrate(20);
+            renderTasks();
+            updateStats();
+            showToast('✅ Task added!');
+        }
+
+        function toggleTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.done = !task.done;
+                saveTasks();
+                if (task.done) {
+                    playSound('complete');
+                    vibrate([30, 20, 30]);
+                    showToast('🎉 Well done!');
+                } else {
+                    vibrate(15);
+                }
+                renderTasks();
+                updateStats();
+            }
+        }
+
+        function deleteTask(id) {
+            playSound('delete');
+            vibrate(15);
+            tasks = tasks.filter(t => t.id !== id);
+            saveTasks();
+            renderTasks();
+            updateStats();
+        }
+
+        function shareTaskList() {
+            if (tasks.length === 0) {
+                showToast('No tasks to share yet!');
+                return;
+            }
+
+            const total = tasks.length;
+            const done = tasks.filter(t => t.done).length;
+            const active = total - done;
+
+            let text = `📋 My Task List\n\n`;
+            text += `📊 Summary: ${total} total • ${active} active • ${done} completed\n\n`;
+
+            const activeTasks = tasks.filter(t => !t.done);
+            if (activeTasks.length > 0) {
+                text += `⏳ Active:\n`;
+                const priorityEmoji = { high: '❤️', medium: '💛', low: '💚' };
+                activeTasks.slice(0, 10).forEach(t => {
+                    text += `${priorityEmoji[t.priority] || '⚪'} ${t.title}`;
+                    if (t.due) text += ` (${formatDate(t.due)})`;
+                    text += `\n`;
+                });
+                if (activeTasks.length > 10) text += `...and ${activeTasks.length - 10} more\n`;
+            }
+
+            if (done > 0) {
+                text += `\n✅ Completed: ${done}`;
+            }
+
+            text += `\n\n— Shared from TaskFlow`;
+
+            if (navigator.share) {
+                navigator.share({ title: 'My Task List', text: text })
+                    .catch(() => copyToClipboard(text));
+            } else {
+                copyToClipboard(text);
+            }
+        }
+
+        function copyToClipboard(text) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text)
+                    .then(() => showToast('📋 Task list copied!'))
+                    .catch(() => showToast('Copy failed.'));
+            } else {
+                showToast('Copy manually: ' + text.substring(0, 40) + '...');
+            }
+        }
+
+        function clearCompleted() {
+            const completed = tasks.filter(t => t.done).length;
+            if (completed === 0) { showToast('No completed tasks to clear.'); return; }
+
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            overlay.innerHTML = `
+                <div class="modal-box">
+                    <h3>Clear completed tasks?</h3>
+                    <p>You will delete ${completed} completed ${completed === 1 ? 'task' : 'tasks'}. This action cannot be undone.</p>
+                    <div class="modal-actions">
+                        <button class="modal-cancel" id="modalCancel">Cancel</button>
+                        <button class="modal-confirm" id="modalConfirm">Clear</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(overlay);
+
+            overlay.querySelector('#modalCancel').addEventListener('click', () => overlay.remove());
+            overlay.querySelector('#modalConfirm').addEventListener('click', () => {
+                overlay.remove();
+                playSound('delete');
+                tasks = tasks.filter(t => !t.done);
+                saveTasks();
+                renderTasks();
+                updateStats();
+                showToast('🗑️ Tasks cleared!');
+            });
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light');
+            const isLight = document.body.classList.contains('light');
+            document.getElementById('themeToggle').textContent = isLight ? '☀️' : '🌙';
+            try { localStorage.setItem(THEME_KEY, isLight ? 'light' : 'dark'); } catch (e) {}
+        }
+
+        function loadTheme() {
+            try {
+                if (localStorage.getItem(THEME_KEY) === 'light') {
+                    document.body.classList.add('light');
+                    document.getElementById('themeToggle').textContent = '☀️';
+                }
+            } catch (e) {}
+        }
+
+        function init() {
+            loadTheme();
+            loadTasks();
+
+            document.querySelectorAll('.priority-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.priority-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    selectedPriority = btn.dataset.priority;
+                });
+            });
+
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentFilter = btn.dataset.filter;
+                    renderTasks();
+                });
+            });
+
+            document.getElementById('addBtn').addEventListener('click', addTask);
+            document.getElementById('taskInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addTask();
+            });
+
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+            document.getElementById('shareBtn').addEventListener('click', shareTaskList);
+            document.getElementById('clearAllBtn').addEventListener('click', clearCompleted);
+
+            renderTasks();
+            updateStats();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
