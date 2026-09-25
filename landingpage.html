@@ -1,38 +1,165 @@
-        <div class="projects-grid">
-            <a href="moodbooster.html" class="project-card" data-accent="purple">
-                <span class="icon">🧠</span>
-                <h3>Mood Booster</h3>
-                <p>Mood tracker with statistics, weekly chart, confetti animations, and curated bell hooks quotes.</p>
-                <span class="open-link">Open project <span>→</span></span>
-            </a>
-            <a href="TaskFlow.html" class="project-card" data-accent="blue">
-                <span class="icon">✅</span>
-                <h3>TaskFlow</h3>
-                <p>Task manager with priorities, filters, deadlines, and a clean modern UI.</p>
-                <span class="open-link">Open project <span>→</span></span>
-            </a>
-            <a href="habittracker.html" class="project-card" data-accent="green">
-                <span class="icon">🌱</span>
-                <h3>Habit Tracker</h3>
-                <p>Daily habit tracker with streak counters and weekly progress dots.</p>
-                <span class="open-link">Open project <span>→</span></span>
-            </a>
-            <a href="invoicegenerator.html" class="project-card" data-accent="coral">
-                <span class="icon">🧾</span>
-                <h3>Invoice Generator</h3>
-                <p>Generate invoices with VAT calculation, PDF export, and share functionality.</p>
-                <span class="open-link">Open project <span>→</span></span>
-            </a>
-            <a href="qrcodegenerator.html" class="project-card" data-accent="green">
-                <span class="icon">📱</span>
-                <h3>QR Code Generator</h3>
-                <p>Generate QR codes for URLs, text, WiFi, and email. Download or share instantly.</p>
-                <span class="open-link">Open project <span>→</span></span>
-            </a>
-            <a href="landingpage.html" class="project-card" data-accent="purple">
-                <span class="icon">🚀</span>
-                <h3>Landing Page</h3>
-                <p>A modern SaaS landing page template with hero, features, pricing, and CTA sections.</p>
-                <span class="open-link">Open project <span>→</span></span>
-            </a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nova — Project Management Made Simple</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background: #050014; color: #f5f5f5; min-height: 100vh; line-height: 1.6; overflow-x: hidden; }
+
+    .ambient { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+    .ambient::before, .ambient::after {
+        content: ''; position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.4;
+    }
+    .ambient::before { width: 600px; height: 600px; background: #ff006e; top: -200px; left: -200px; animation: drift 15s ease-in-out infinite; }
+    .ambient::after { width: 500px; height: 500px; background: #8338ec; bottom: -200px; right: -200px; animation: drift 15s ease-in-out infinite reverse; }
+    @keyframes drift { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(50px, -30px); } }
+
+    nav { position: fixed; top: 0; left: 0; right: 0; padding: 18px 28px; display: flex; justify-content: space-between; align-items: center; z-index: 100; backdrop-filter: blur(20px); background: rgba(5, 0, 20, 0.6); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+    .nav-logo { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(135deg, #ff006e, #8338ec); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .nav-links { display: flex; gap: 26px; align-items: center; }
+    .nav-links a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover { color: #fff; }
+    .nav-cta { padding: 8px 18px; background: linear-gradient(135deg, #ff006e, #8338ec); color: #fff !important; border-radius: 20px; font-weight: 700 !important; }
+
+    @media (max-width: 700px) { .nav-links a:not(.nav-cta) { display: none; } }
+
+    .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 100px 24px 60px; text-align: center; }
+    .hero-inner { max-width: 780px; }
+    .hero-pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; background: rgba(255, 0, 110, 0.12); border: 1px solid rgba(255, 0, 110, 0.35); border-radius: 30px; color: #ff4d94; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 28px; animation: fadeUp 0.7s ease; }
+    .hero h1 { font-size: clamp(40px, 9vw, 84px); font-weight: 900; letter-spacing: -3px; line-height: 1; margin-bottom: 24px; animation: fadeUp 0.7s ease 0.1s both; }
+    .hero h1 .gradient { background: linear-gradient(135deg, #ff006e, #8338ec, #3a86ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero p { font-size: clamp(16px, 2.4vw, 21px); color: rgba(255,255,255,0.65); max-width: 560px; margin: 0 auto 40px; animation: fadeUp 0.7s ease 0.2s both; }
+    .hero-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; animation: fadeUp 0.7s ease 0.3s both; }
+    .btn { padding: 15px 32px; border-radius: 30px; font-size: 15px; font-weight: 700; text-decoration: none; cursor: pointer; border: none; transition: all 0.25s; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-primary { background: linear-gradient(135deg, #ff006e, #8338ec); color: #fff; box-shadow: 0 10px 30px rgba(255, 0, 110, 0.4); }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(255, 0, 110, 0.55); }
+    .btn-ghost { background: rgba(255,255,255,0.06); color: #fff; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); }
+    .btn-ghost:hover { background: rgba(255,255,255,0.12); }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+
+    .section { padding: 100px 24px; max-width: 1100px; margin: 0 auto; }
+    .section-tag { text-align: center; font-size: 12px; font-weight: 700; letter-spacing: 2px; color: #ff4d94; text-transform: uppercase; margin-bottom: 14px; }
+    .section-title { text-align: center; font-size: clamp(30px, 5vw, 52px); font-weight: 800; letter-spacing: -1.5px; margin-bottom: 60px; }
+
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+    .feature-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 22px; padding: 32px 26px; backdrop-filter: blur(10px); transition: all 0.3s; }
+    .feature-card:hover { border-color: rgba(255, 0, 110, 0.4); transform: translateY(-5px); background: rgba(255,255,255,0.05); }
+    .feature-icon { font-size: 36px; margin-bottom: 18px; display: inline-block; padding: 12px; border-radius: 16px; background: linear-gradient(135deg, rgba(255, 0, 110, 0.15), rgba(131, 56, 236, 0.15)); }
+    .feature-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+    .feature-card p { font-size: 14.5px; color: rgba(255,255,255,0.6); line-height: 1.6; }
+
+    .stats-band { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; padding: 48px 32px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 28px; margin-top: 60px; backdrop-filter: blur(10px); }
+    .stat-item { text-align: center; }
+    .stat-item .num { font-size: clamp(30px, 5vw, 48px); font-weight: 900; letter-spacing: -2px; background: linear-gradient(135deg, #ff006e, #8338ec); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .stat-item .lbl { font-size: 12px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; margin-top: 6px; font-weight: 600; }
+
+    .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+    .price-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 34px 28px; backdrop-filter: blur(10px); transition: all 0.3s; position: relative; }
+    .price-card.featured { border-color: rgba(255, 0, 110, 0.5); background: linear-gradient(180deg, rgba(255, 0, 110, 0.08), rgba(131, 56, 236, 0.05)); transform: scale(1.02); }
+    .price-card.featured::before { content: 'MOST POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); padding: 5px 14px; background: linear-gradient(135deg, #ff006e, #8338ec); color: #fff; border-radius: 20px; font-size: 10px; font-weight: 800; letter-spacing: 1px; }
+    .price-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+    .price-card .price { font-size: 44px; font-weight: 900; letter-spacing: -2px; margin-bottom: 4px; }
+    .price-card .price span { font-size: 16px; font-weight: 500; color: rgba(255,255,255,0.5); }
+    .price-card .desc { font-size: 13px; color: rgba(255,255,255,0.55); margin-bottom: 22px; }
+    .price-card ul { list-style: none; margin-bottom: 24px; }
+    .price-card ul li { font-size: 13.5px; color: rgba(255,255,255,0.7); padding: 6px 0 6px 24px; position: relative; }
+    .price-card ul li::before { content: '✓'; position: absolute; left: 0; color: #ff4d94; font-weight: 700; }
+    .price-card .btn { width: 100%; justify-content: center; padding: 13px; font-size: 14px; }
+
+    .cta-final { text-align: center; padding: 100px 24px; max-width: 720px; margin: 0 auto; }
+    .cta-final h2 { font-size: clamp(32px, 6vw, 56px); font-weight: 900; letter-spacing: -2px; margin-bottom: 20px; line-height: 1.05; }
+    .cta-final h2 .gradient { background: linear-gradient(135deg, #ff006e, #8338ec, #3a86ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .cta-final p { font-size: 17px; color: rgba(255,255,255,0.6); margin-bottom: 34px; }
+
+    footer { padding: 40px 28px; text-align: center; border-top: 1px solid rgba(255,255,255,0.06); font-size: 13px; color: rgba(255,255,255,0.4); }
+
+    @media (max-width: 600px) {
+        .section { padding: 70px 20px; }
+        .stats-band { grid-template-columns: 1fr; padding: 32px 24px; }
+        .btn { padding: 13px 24px; font-size: 14px; }
+    }
+</style>
+</head>
+<body>
+    <div class="ambient"></div>
+
+    <nav>
+        <div class="nav-logo">✦ Nova</div>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#contact">Contact</a>
+            <a href="#contact" class="nav-cta">Get Started</a>
         </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-inner">
+            <div class="hero-pill">🚀 Version 2.0 is here</div>
+            <h1>Project management<br><span class="gradient">made simple.</span></h1>
+            <p>Nova helps small teams plan, track, and ship projects without the chaos. Beautifully simple, incredibly powerful.</p>
+            <div class="hero-buttons">
+                <a href="#contact" class="btn btn-primary">Get Started Free →</a>
+                <a href="#features" class="btn btn-ghost">Learn More</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="features">
+        <div class="section-tag">Features</div>
+        <h2 class="section-title">Everything you need. Nothing you don't.</h2>
+        <div class="features-grid">
+            <div class="feature-card"><div class="feature-icon">⚡</div><h3>Lightning Fast</h3><p>Built for speed. Nova loads instantly and stays out of your way so you can focus on actual work.</p></div>
+            <div class="feature-card"><div class="feature-icon">🎯</div><h3>Focus on What Matters</h3><p>Smart priorities and clean views help your team see exactly what needs attention right now.</p></div>
+            <div class="feature-card"><div class="feature-icon">🤝</div><h3>Built for Teams</h3><p>Real-time collaboration, comments, and mentions. Work together without endless email threads.</p></div>
+            <div class="feature-card"><div class="feature-icon">📊</div><h3>Insightful Analytics</h3><p>Track progress, spot bottlenecks, and celebrate wins with beautiful built-in dashboards.</p></div>
+            <div class="feature-card"><div class="feature-icon">🔒</div><h3>Secure by Default</h3><p>End-to-end encryption, SSO, and granular permissions. Your data stays yours, always.</p></div>
+            <div class="feature-card"><div class="feature-icon">🔌</div><h3>Integrates Everything</h3><p>Connect with Slack, GitHub, Figma, Google Drive, and 100+ other tools your team already uses.</p></div>
+        </div>
+        <div class="stats-band">
+            <div class="stat-item"><div class="num">50K+</div><div class="lbl">Active Users</div></div>
+            <div class="stat-item"><div class="num">99.9%</div><div class="lbl">Uptime</div></div>
+            <div class="stat-item"><div class="num">4.9★</div><div class="lbl">User Rating</div></div>
+        </div>
+    </section>
+
+    <section class="section" id="pricing">
+        <div class="section-tag">Pricing</div>
+        <h2 class="section-title">Simple, honest pricing.</h2>
+        <div class="pricing-grid">
+            <div class="price-card">
+                <h3>Starter</h3>
+                <div class="price">$0<span>/mo</span></div>
+                <div class="desc">For individuals getting started.</div>
+                <ul><li>Up to 3 projects</li><li>Unlimited tasks</li><li>Basic analytics</li><li>Community support</li></ul>
+                <button class="btn btn-ghost">Get Started</button>
+            </div>
+            <div class="price-card featured">
+                <h3>Pro</h3>
+                <div class="price">$12<span>/mo</span></div>
+                <div class="desc">For small teams that need more.</div>
+                <ul><li>Unlimited projects</li><li>Advanced analytics</li><li>Team collaboration</li><li>Priority support</li><li>Integrations</li></ul>
+                <button class="btn btn-primary">Start Free Trial</button>
+            </div>
+            <div class="price-card">
+                <h3>Enterprise</h3>
+                <div class="price">$49<span>/mo</span></div>
+                <div class="desc">For organizations at scale.</div>
+                <ul><li>Everything in Pro</li><li>SSO & SCIM</li><li>Custom contracts</li><li>Dedicated support</li><li>SLA guarantee</li></ul>
+                <button class="btn btn-ghost">Contact Sales</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-final" id="contact">
+        <h2>Ready to ship <span class="gradient">faster?</span></h2>
+        <p>Join thousands of teams already using Nova to get work done.</p>
+        <a href="#" class="btn btn-primary">Start Your Free Trial →</a>
+    </section>
+
+    <footer>© 2026 Nova · A demo landing page built by Florin Craciunoiu</footer>
+</body>
+</html>
